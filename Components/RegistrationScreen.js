@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import {Text, View, StyleSheet, Picker, ScrollView, Alert} from 'react-native';
+import {Text, View, StyleSheet, ScrollView, Alert, Picker} from 'react-native';
 import {TextInput} from 'react-native-paper';
 import {Icon, Button, Card} from 'react-native-elements';
-import firebase from '../firebase';
+import {auth, db} from '../firebase/firebase';
+import DatePicker from 'react-native-datepicker'
 
 class RegistrationScreen extends Component{
     constructor(props){
@@ -18,7 +19,9 @@ class RegistrationScreen extends Component{
             address : '',
             areaState : '',
             pincode : '',
-            gender : 'male',
+            gender : 'Male',
+            dob: '',
+            isLoading : false
 
         };
     }
@@ -33,6 +36,8 @@ class RegistrationScreen extends Component{
     handlePrev = () => {
         this.setState({step: this.state.step - 1});
     };
+
+
 
     RenderForm = () => {
         switch(this.state.step){
@@ -116,6 +121,8 @@ class RegistrationScreen extends Component{
     };
 
     BasicDetails = () => {
+
+
         return(
             <View>
                 <View style={styles.inputContainer}>
@@ -142,13 +149,50 @@ class RegistrationScreen extends Component{
                 <View style={styles.inputContainer}>
                     <View style={{ flexDirection: "row", alignItems:"center", justifyContent:"space-around", paddingLeft: 10, paddingRight: 10 }}>
                         <Text style={{flex:1}}>Gender : </Text>
-                        <Picker style={{flex:3, backgroundColor:"#ebe8e8" }}>
-                            <Picker.Item label="male" value="male" />
-                            <Picker.Item label="female" value="female" />
+                        <Picker
+                            selectedValue={this.state.gender}
+                            style={{height: 50, flex: 1}}
+                            onValueChange={(itemValue, itemIndex) =>
+                                this.setState({gender: itemValue})
+                            }>
+                            <Picker.Item label="Male" value="Male" />
+                            <Picker.Item label="Female" value="Female" />
                         </Picker>
-                    </View>
+                    </View> 
                 </View>
 
+                <View style={styles.inputContainer}>
+                    <View style={{ flexDirection: "row", alignItems:"center", justifyContent:"space-around", paddingLeft: 10, paddingRight: 10 }}>
+                        <Text style={{flex: 1}}>Date of Birth :</Text>
+                        <DatePicker
+                            style={{ flex: 2}}
+                            date={this.state.dob}
+                            mode="date"
+                            placeholder="select date"
+                            format="YYYY-MM-DD"
+                            minDate="2016-05-01"
+                            maxDate="2016-06-01"
+                            confirmBtnText="Confirm"
+                            cancelBtnText="Cancel"
+                            customStyles={{
+                            dateIcon: {
+                                position: 'absolute',
+                                left: 0,
+                                top: 4,
+                                marginLeft: 0
+                            },
+                            dateInput: {
+                                marginLeft: 36
+                            }
+                            // ... You can check the source to find the other keys.
+                            }}
+                            onDateChange={(date) => {this.setState({dob: date})}}
+                        />
+                    </View>
+                    
+                </View>
+                
+                
                 <Button title="Continue"
                             buttonStyle={{backgroundColor: '#673ab7', marginBottom:10}}
                             iconRight={true}
@@ -188,6 +232,7 @@ class RegistrationScreen extends Component{
                         <TextInput 
                             label="Email"
                             mode='outlined'
+                            disabled={true}
                             keyboardType="email-address"
                             value={this.state.email}
                             onChangeText={email => this.setState({email})}
@@ -252,6 +297,7 @@ class RegistrationScreen extends Component{
                 <Card title="Confirm Details">
                     <Text>Name : {this.state.firstname} {this.state.lastname}</Text>
                     <Text>Gender : {this.state.gender}</Text>
+                    <Text>DOB : {this.state.dob}</Text>
                     <Text>Phone : {this.state.phone}</Text>
                     <Text>Email : {this.state.email}</Text>
                     <Text>Address : {this.state.address}, {this.state.areaState}, Pin - {this.state.pincode}</Text>
@@ -259,29 +305,50 @@ class RegistrationScreen extends Component{
                 <View style={{marginTop: 10}}>
                     <Button title="Confirm"
                         buttonStyle={{backgroundColor: '#673ab7', marginBottom:10}}
-                        
+                        loading={this.state.isLoading}
                         style={{marginTop: 10}}
                         onPress={() => this.handleSubmit()}
                         icon={<Icon name='check-circle' style={{marginRight: 5 }} color="#fff" type='font-awesome-5'/>}
                  />
+                 <Button title="Previous" 
+                            buttonStyle={{backgroundColor: '#ebe8e8'}}
+                            titleStyle={{color: "#999"}}
+                            onPress={() => this.handlePrev()}
+                            icon={<Icon name='arrow-alt-circle-left' color="#999" style={{marginRight: 5}} type='font-awesome-5'/>}
+                         />
                 </View>
                 
             </View>
         );
     };
 
-    signUpUser = (email, password) => {
+     signUpUser = async (email, password) => {
         try{
-            firebase.auth().createUserWithEmailAndPassword(email, password);
+             db.collection('customers').add({
+                name : this.state.firstname + " " + this.state.lastname,
+                gender : this.state.gender,
+                dob : this.state.dob,
+                phone : this.state.phone,
+                email : this.state.email,
+                address : `${this.state.address}, ${this.state.areaState}, Pin - ${this.state.pincode}`,
+                photo: "",
+                idproof: ""
+             }).then((docRef) => {
+                console.log("Document written with ID: ", docRef.id);
+                auth.createUserWithEmailAndPassword(email, password).catch(error => {
+                    alert(error.toString());
+                    this.setState({isLoading: false});
+                }); 
+             });
           }catch(error){
-            Alert.alert(error.toString());
+           console.log(error);
+           this.setState({isLoading: false});
           }
-
     };
 
-    handleSubmit = () => {
-        this.signUpUser(this.state.email, this.state.password);
-
+    handleSubmit = async () => {
+        this.setState({isLoading: true});
+       await this.signUpUser(this.state.email, this.state.password);
     };
 
     render(){

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet, Picker, ScrollView, Alert} from 'react-native';
 import {TextInput} from 'react-native-paper';
 import {Icon, Button, Card} from 'react-native-elements';
-import firebase from '../firebase';
+import {auth} from '../firebase/firebase';
 
 class LoginScreen extends Component {
 
@@ -20,10 +20,9 @@ class LoginScreen extends Component {
     signInUser = (email, password) => {
         this.setState({isLoading : true});
         try{
-            firebase.auth().signInWithEmailAndPassword(email, password)
+            auth.signInWithEmailAndPassword(email, password)
             .then(user => {
                 this.setState({isLoading : false});
-              alert(JSON.stringify(user));
             }).catch(error => {this.setState({isLoading: false, err: error.toString(), warn: true})});
           }
           catch(error){
@@ -73,20 +72,7 @@ class LoginScreen extends Component {
                             onPress={() => this.signInUser(this.state.email, this.state.password)}
                             icon={<Icon name='sign-in-alt' style={{marginLeft: 5 }} color="#fff" type='font-awesome-5'/>}
                 />
-                <View style={{flexDirection:'row', alignItems: 'center'}}>
-                    <View>
-                        <Text>New User?</Text>
-                    </View>
-                    <View>
-
-                        <Button title="Register"
-                                    iconRight={true}
-                                    titleStyle={{fontSize: 14}}
-                                    type="clear"
-                                    onPress={() => this.props.navigation.navigate('RegistrationScreen')}
-                                />
-                    </View>
-                </View>
+                
             </View>
         );
     };
@@ -103,7 +89,16 @@ class LoginScreen extends Component {
                 </View>
 
                 {this.RenderForm()}
-                
+
+
+                <Card containerStyle={{borderRadius: 10, margin: 0}}>
+                <Text style={{marginBottom: 10}}>New User ?</Text>
+                <Button
+                    title="Sign Up"
+                    type="outline"
+                    onPress={() => this.props.navigation.navigate('SignUpScreen')}
+                    />
+            </Card>
             </ScrollView>
         );
     }
