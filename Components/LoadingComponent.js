@@ -1,4 +1,8 @@
-import React, { Component } from 'react';
-import { View, Text, ScrollView } from 'react-native';
-import {Button} from 'react-native-elements';
-import {auth} from '../firebase/firebase';
+import * as React from 'react';
+import { ActivityIndicator, Colors } from 'react-native-paper';
+
+const Loading = () => (
+  <ActivityIndicator animating={true} />
+);
+
+export default Loading;

@@ -122,7 +122,7 @@ class SignUpScreen extends Component {
                 </View>
 
                 <Button title="Sign Up"
-                        buttonStyle={{backgroundColor: '#673ab7', marginBottom:10}}
+                        buttonStyle={{backgroundColor: '#673ab7', marginBottom:10,}}
                         loading={this.state.isLoading}
                         icon={<Icon name='user-plus' style={{marginRight: 5 }} color="#fff" type='font-awesome-5'/>}
                         onPress= {() => this.signUpUser(this.state.email, this.state.password)} />

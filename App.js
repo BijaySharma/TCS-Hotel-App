@@ -10,6 +10,7 @@ import HomeScreen from './Components/HomeScreen';
 import { auth } from './firebase/firebase';
 import SplashScreen from './Components/SplashScreen';
 import SignUpScreen from './Components/SignUpScreen';
+import MainScreen from './Components/MainScreen';
 const theme = {
    ...DefaultTheme,
    roundness: 2,
@@ -54,29 +55,26 @@ class App extends Component{
         (
           <NavigationContainer>
           <StatusBar barStyle="light-content" backgroundColor="#673ab7" />
-          <Stack.Navigator 
-           screenOptions={{
-            headerStyle: {
-              backgroundColor: "#673ab7",
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}>
-  
-              {this.state.isLoggedIn ? (
-                <>
-                <Stack.Screen name="HomeScreen" options={{title: "Home"}} component={HomeScreen} />
-                </>
-              ) : (
-                <>
-                  <Stack.Screen name="SignUpScreen" options={{title: "Sign Up"}} component={SignUpScreen} />
-                  <Stack.Screen name="LoginScreen" options={{title: "Login"}} component={LoginScreen} />
-                </>
-              )}
-            
-          </Stack.Navigator>
+          {this.state.isLoggedIn ? (
+            <MainScreen />
+          ) : (
+
+            <Stack.Navigator 
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: "#673ab7",
+              },
+              headerTintColor: '#fff',
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
+            }}>
+    
+              <Stack.Screen name="SignUpScreen" options={{title: "Sign Up"}} component={SignUpScreen} />
+              <Stack.Screen name="LoginScreen" options={{title: "Login"}} component={LoginScreen} />
+        
+            </Stack.Navigator>
+          ) }
         </NavigationContainer>
         )}
      
